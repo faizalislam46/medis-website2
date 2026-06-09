@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Link, Navigate, useNavigate } from "react-router-dom";
 import api from "./api";
 import "./index.css";
+import * as XLSX from "xlsx";
 
 const categories = [
   "Matematika", "Fisika", "Kimia", "Biologi", "Astronomi",
@@ -199,6 +200,47 @@ function AdminDashboard() {
     }
   };
 
+const uploadExcel = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const data = await file.arrayBuffer();
+
+  const workbook = XLSX.read(data);
+
+  const sheetName = workbook.SheetNames[0];
+
+  const sheet = workbook.Sheets[sheetName];
+
+  const rows = XLSX.utils.sheet_to_json(sheet);
+
+  try {
+    for (const row of rows) {
+      await api.post("/questions", {
+        category: row.Kategori,
+        difficulty: row.Level,
+        questionText: row.Soal,
+        options: [
+          row.A,
+          row.B,
+          row.C,
+          row.D,
+          row.E
+        ].filter(Boolean),
+        correctAnswer: row.Jawaban,
+        explanation: row.Pembahasan
+      });
+    }
+
+    alert(`${rows.length} soal berhasil diupload`);
+    loadData();
+
+  } catch (err) {
+    console.error(err);
+    alert("Upload gagal");
+  }
+};
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -218,6 +260,18 @@ function AdminDashboard() {
         </div>
 
         <div className="bg-white rounded-3xl shadow p-6 mb-8">
+          <div className="mb-6">
+  <label className="block mb-2 font-semibold">
+    Upload Soal Excel
+  </label>
+
+  <input
+    type="file"
+    accept=".xlsx,.xls"
+    onChange={uploadExcel}
+    className="border p-3 rounded-xl bg-white"
+  />
+</div>
           <h2 className="text-2xl font-bold mb-5">Tambah Soal Baru</h2>
 
           <form onSubmit={addQuestion} className="grid md:grid-cols-2 gap-4">
