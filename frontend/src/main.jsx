@@ -30,20 +30,37 @@ function Layout({ children }) {
       <nav className="bg-white border-b sticky top-0 z-20">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="font-bold text-2xl text-blue-700">MEDIS</Link>
+
           <div className="flex gap-3 items-center text-sm">
-            {user?.role === "admin" && <Link to="/admin" className="font-medium">Dashboard Admin</Link>}
-            {user?.role === "student" && <Link to="/student" className="font-medium">Dashboard Murid</Link>}
+            {user?.role === "admin" && (
+              <Link to="/admin" className="font-medium">Dashboard Admin</Link>
+            )}
+
+            {user?.role === "student" && (
+              <Link to="/student" className="font-medium">Dashboard Murid</Link>
+            )}
+
             {user ? (
-              <button onClick={logout} className="px-4 py-2 rounded-xl bg-red-50 text-red-600">Logout</button>
+              <button
+                onClick={logout}
+                className="px-4 py-2 rounded-xl bg-red-50 text-red-600"
+              >
+                Logout
+              </button>
             ) : (
               <>
-                <Link to="/login" className="px-4 py-2 rounded-xl bg-blue-600 text-white">Login</Link>
-                <Link to="/register" className="px-4 py-2 rounded-xl bg-green-500 text-white">Register</Link>
+                <Link to="/login" className="px-4 py-2 rounded-xl bg-blue-600 text-white">
+                  Login
+                </Link>
+                <Link to="/register" className="px-4 py-2 rounded-xl bg-green-500 text-white">
+                  Register
+                </Link>
               </>
             )}
           </div>
         </div>
       </nav>
+
       <main>{children}</main>
     </div>
   );
@@ -55,14 +72,28 @@ function Landing() {
       <section className="bg-gradient-to-br from-blue-700 via-blue-600 to-green-500 text-white">
         <div className="max-w-6xl mx-auto px-4 py-20 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="uppercase tracking-widest text-sm mb-3">Mentoring English and Science Smudama</p>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">Platform latihan olimpiade untuk siswa berprestasi.</h1>
-            <p className="mt-5 text-lg text-blue-50">Latihan soal, pembahasan, skor, dan progres belajar dalam satu website yang mudah digunakan.</p>
+            <p className="uppercase tracking-widest text-sm mb-3">
+              Mentoring English and Science Smudama
+            </p>
+
+            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
+              Platform latihan olimpiade untuk siswa berprestasi.
+            </h1>
+
+            <p className="mt-5 text-lg text-blue-50">
+              Latihan soal, pembahasan, skor, dan progres belajar dalam satu website yang mudah digunakan.
+            </p>
+
             <div className="mt-8 flex gap-3">
-              <Link to="/register" className="bg-white text-blue-700 px-6 py-3 rounded-2xl font-bold">Mulai Belajar</Link>
-              <Link to="/login" className="border border-white px-6 py-3 rounded-2xl font-bold">Masuk</Link>
+              <Link to="/register" className="bg-white text-blue-700 px-6 py-3 rounded-2xl font-bold">
+                Mulai Belajar
+              </Link>
+              <Link to="/login" className="border border-white px-6 py-3 rounded-2xl font-bold">
+                Masuk
+              </Link>
             </div>
           </div>
+
           <div className="bg-white/15 rounded-3xl p-6 backdrop-blur">
             <div className="grid grid-cols-2 gap-4">
               {categories.map((cat) => (
@@ -81,17 +112,25 @@ function Landing() {
 
 function Auth({ type }) {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", school: "SMUDAMA" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    school: "SMUDAMA"
+  });
   const [error, setError] = useState("");
 
   const submit = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
       const url = type === "login" ? "/auth/login" : "/auth/register";
       const { data } = await api.post(url, form);
+
       localStorage.setItem("medis_token", data.token);
       localStorage.setItem("medis_user", JSON.stringify(data.user));
+
       navigate(data.user.role === "admin" ? "/admin" : "/student");
     } catch (err) {
       setError(err.response?.data?.message || "Terjadi kesalahan");
@@ -102,19 +141,58 @@ function Auth({ type }) {
     <Layout>
       <div className="max-w-md mx-auto px-4 py-14">
         <div className="bg-white rounded-3xl shadow p-8">
-          <h1 className="text-3xl font-bold text-blue-700 mb-2">{type === "login" ? "Login" : "Register Murid"}</h1>
-          <p className="text-slate-500 mb-6">Masuk ke platform MEDIS.</p>
-          {error && <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4">{error}</div>}
+          <h1 className="text-3xl font-bold text-blue-700 mb-2">
+            {type === "login" ? "Login" : "Register Murid"}
+          </h1>
+
+          <p className="text-slate-500 mb-6">
+            Masuk ke platform MEDIS.
+          </p>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-xl mb-4">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={submit} className="space-y-4">
             {type !== "login" && (
               <>
-                <input className="w-full border rounded-xl p-3" placeholder="Nama Lengkap" onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                <input className="w-full border rounded-xl p-3" placeholder="Sekolah" value={form.school} onChange={(e) => setForm({ ...form, school: e.target.value })} />
+                <input
+                  className="w-full border rounded-xl p-3"
+                  placeholder="Nama Lengkap"
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+
+                <input
+                  className="w-full border rounded-xl p-3"
+                  placeholder="Sekolah"
+                  value={form.school}
+                  onChange={(e) => setForm({ ...form, school: e.target.value })}
+                />
               </>
             )}
-            <input className="w-full border rounded-xl p-3" type="email" placeholder="Email" onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-            <input className="w-full border rounded-xl p-3" type="password" placeholder="Password" onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-            <button className="w-full bg-blue-600 text-white rounded-xl p-3 font-bold">{type === "login" ? "Login" : "Daftar"}</button>
+
+            <input
+              className="w-full border rounded-xl p-3"
+              type="email"
+              placeholder="Email"
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              required
+            />
+
+            <input
+              className="w-full border rounded-xl p-3"
+              type="password"
+              placeholder="Password"
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              required
+            />
+
+            <button className="w-full bg-blue-600 text-white rounded-xl p-3 font-bold">
+              {type === "login" ? "Login" : "Daftar"}
+            </button>
           </form>
         </div>
       </div>
@@ -124,8 +202,10 @@ function Auth({ type }) {
 
 function RequireRole({ role, children }) {
   const user = getUser();
+
   if (!user) return <Navigate to="/login" />;
   if (user.role !== role) return <Navigate to="/" />;
+
   return children;
 }
 
@@ -200,46 +280,36 @@ function AdminDashboard() {
     }
   };
 
-const uploadExcel = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const uploadExcel = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const data = await file.arrayBuffer();
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet);
 
-  const workbook = XLSX.read(data);
+    try {
+      for (const row of rows) {
+        await api.post("/questions", {
+          category: row.Kategori,
+          difficulty: row.Level,
+          questionText: row.Soal,
+          options: [row.A, row.B, row.C, row.D, row.E].filter(Boolean),
+          correctAnswer: row.Jawaban,
+          explanation: row.Pembahasan
+        });
+      }
 
-  const sheetName = workbook.SheetNames[0];
-
-  const sheet = workbook.Sheets[sheetName];
-
-  const rows = XLSX.utils.sheet_to_json(sheet);
-
-  try {
-    for (const row of rows) {
-      await api.post("/questions", {
-        category: row.Kategori,
-        difficulty: row.Level,
-        questionText: row.Soal,
-        options: [
-          row.A,
-          row.B,
-          row.C,
-          row.D,
-          row.E
-        ].filter(Boolean),
-        correctAnswer: row.Jawaban,
-        explanation: row.Pembahasan
-      });
+      alert(`${rows.length} soal berhasil diupload`);
+      loadData();
+      e.target.value = "";
+    } catch (err) {
+      console.error(err);
+      alert("Upload gagal. Pastikan format kolom Excel sudah benar.");
     }
-
-    alert(`${rows.length} soal berhasil diupload`);
-    loadData();
-
-  } catch (err) {
-    console.error(err);
-    alert("Upload gagal");
-  }
-};
+  };
 
   return (
     <Layout>
@@ -260,19 +330,26 @@ const uploadExcel = async (e) => {
         </div>
 
         <div className="bg-white rounded-3xl shadow p-6 mb-8">
-          <div className="mb-6">
-  <label className="block mb-2 font-semibold">
-    Upload Soal Excel
-  </label>
+          <h2 className="text-2xl font-bold mb-5">
+            Tambah Soal Baru
+          </h2>
 
-  <input
-    type="file"
-    accept=".xlsx,.xls"
-    onChange={uploadExcel}
-    className="border p-3 rounded-xl bg-white"
-  />
-</div>
-          <h2 className="text-2xl font-bold mb-5">Tambah Soal Baru</h2>
+          <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-4">
+            <label className="block mb-2 font-semibold text-blue-700">
+              Upload Soal Excel
+            </label>
+
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={uploadExcel}
+              className="border p-3 rounded-xl bg-white w-full"
+            />
+
+            <p className="text-sm text-slate-500 mt-2">
+              Format kolom: Kategori, Level, Soal, A, B, C, D, E, Jawaban, Pembahasan
+            </p>
+          </div>
 
           <form onSubmit={addQuestion} className="grid md:grid-cols-2 gap-4">
             <select
@@ -450,17 +527,30 @@ function StudentDashboard() {
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold text-blue-700">Dashboard Murid</h1>
-        <p className="text-slate-500 mt-2">Pilih bidang olimpiade dan mulai latihan.</p>
+        <h1 className="text-3xl font-bold text-blue-700">
+          Dashboard Murid
+        </h1>
+
+        <p className="text-slate-500 mt-2">
+          Pilih bidang olimpiade dan mulai latihan.
+        </p>
+
         <div className="grid md:grid-cols-3 gap-4 mt-8">
           {categories.map((cat) => (
-            <Link key={cat} to={`/quiz/${encodeURIComponent(cat)}`} className="bg-white rounded-3xl shadow p-6 hover:shadow-lg transition">
+            <Link
+              key={cat}
+              to={`/quiz/${encodeURIComponent(cat)}`}
+              className="bg-white rounded-3xl shadow p-6 hover:shadow-lg transition"
+            >
               <div className="text-4xl">📘</div>
               <h2 className="font-bold text-xl mt-4">{cat}</h2>
-              <p className="text-slate-500 mt-2">Kerjakan soal dan lihat pembahasan.</p>
+              <p className="text-slate-500 mt-2">
+                Kerjakan soal dan lihat pembahasan.
+              </p>
             </Link>
           ))}
         </div>
+
         <History />
       </div>
     </Layout>
@@ -474,17 +564,20 @@ function Quiz() {
   const [result, setResult] = useState(null);
 
   useEffect(() => {
-    api.get(`/questions?category=${encodeURIComponent(category)}`).then(res => setQuestions(res.data));
+    api
+      .get(`/questions?category=${encodeURIComponent(category)}`)
+      .then((res) => setQuestions(res.data));
   }, [category]);
 
   const submit = async () => {
     const payload = {
       category,
-      answers: questions.map(q => ({
+      answers: questions.map((q) => ({
         question: q._id,
         selectedAnswer: answers[q._id] || ""
       }))
     };
+
     const { data } = await api.post("/attempts", payload);
     setResult(data);
   };
@@ -494,16 +587,40 @@ function Quiz() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold text-blue-700">Latihan {category}</h1>
+        <h1 className="text-3xl font-bold text-blue-700">
+          Latihan {category}
+        </h1>
+
         <div className="space-y-5 mt-8">
           {questions.map((q, idx) => (
             <div key={q._id} className="bg-white rounded-3xl shadow p-6">
-              <p className="font-bold mb-2">Soal {idx + 1} · {q.difficulty}</p>
-              <p className="text-slate-700 mb-4">{q.questionText}</p>
+              <p className="font-bold mb-2">
+                Soal {idx + 1} · {q.difficulty}
+              </p>
+
+              <p className="text-slate-700 mb-4">
+                {q.questionText}
+              </p>
+
               <div className="space-y-2">
-                {q.options.map(opt => (
-                  <label key={opt} className={`block border rounded-xl p-3 cursor-pointer ${answers[q._id] === opt ? "border-blue-600 bg-blue-50" : ""}`}>
-                    <input type="radio" name={q._id} className="mr-2" onChange={() => setAnswers({ ...answers, [q._id]: opt })} />
+                {q.options.map((opt) => (
+                  <label
+                    key={opt}
+                    className={`block border rounded-xl p-3 cursor-pointer ${
+                      answers[q._id] === opt
+                        ? "border-blue-600 bg-blue-50"
+                        : ""
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={q._id}
+                      className="mr-2"
+                      onChange={() =>
+                        setAnswers({ ...answers, [q._id]: opt })
+                      }
+                    />
+
                     {opt}
                   </label>
                 ))}
@@ -511,10 +628,18 @@ function Quiz() {
             </div>
           ))}
         </div>
+
         {questions.length === 0 ? (
-          <div className="bg-yellow-50 text-yellow-700 rounded-2xl p-5 mt-6">Belum ada soal untuk kategori ini.</div>
+          <div className="bg-yellow-50 text-yellow-700 rounded-2xl p-5 mt-6">
+            Belum ada soal untuk kategori ini.
+          </div>
         ) : (
-          <button onClick={submit} className="mt-6 bg-green-500 text-white rounded-2xl px-6 py-3 font-bold">Selesai & Lihat Skor</button>
+          <button
+            onClick={submit}
+            className="mt-6 bg-green-500 text-white rounded-2xl px-6 py-3 font-bold"
+          >
+            Selesai & Lihat Skor
+          </button>
         )}
       </div>
     </Layout>
@@ -526,24 +651,56 @@ function Result({ result }) {
     <Layout>
       <div className="max-w-4xl mx-auto px-4 py-10">
         <div className="bg-white rounded-3xl shadow p-8 text-center">
-          <h1 className="text-3xl font-bold text-blue-700">Hasil Latihan</h1>
-          <p className="text-6xl font-extrabold text-green-500 mt-5">{result.score}/{result.totalQuestions}</p>
-          <p className="text-slate-500 mt-2">Kategori: {result.category}</p>
+          <h1 className="text-3xl font-bold text-blue-700">
+            Hasil Latihan
+          </h1>
+
+          <p className="text-6xl font-extrabold text-green-500 mt-5">
+            {result.score}/{result.totalQuestions}
+          </p>
+
+          <p className="text-slate-500 mt-2">
+            Kategori: {result.category}
+          </p>
         </div>
+
         <div className="space-y-4 mt-8">
           {result.answers.map((a, idx) => (
             <div key={a._id || idx} className="bg-white rounded-3xl shadow p-6">
-              <p className="font-bold">Soal {idx + 1}</p>
-              <p className="mt-2">{a.question?.questionText}</p>
-              <p className={`mt-3 font-semibold ${a.isCorrect ? "text-green-600" : "text-red-600"}`}>
-                Jawaban kamu: {a.selectedAnswer || "Kosong"} — {a.isCorrect ? "Benar" : "Salah"}
+              <p className="font-bold">
+                Soal {idx + 1}
               </p>
-              <p className="mt-2 text-blue-700 font-semibold">Kunci: {a.question?.correctAnswer}</p>
-              <p className="mt-2 text-slate-600">Pembahasan: {a.question?.explanation}</p>
+
+              <p className="mt-2">
+                {a.question?.questionText}
+              </p>
+
+              <p
+                className={`mt-3 font-semibold ${
+                  a.isCorrect ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                Jawaban kamu: {a.selectedAnswer || "Kosong"} —{" "}
+                {a.isCorrect ? "Benar" : "Salah"}
+              </p>
+
+              <p className="mt-2 text-blue-700 font-semibold">
+                Kunci: {a.question?.correctAnswer}
+              </p>
+
+              <p className="mt-2 text-slate-600">
+                Pembahasan: {a.question?.explanation}
+              </p>
             </div>
           ))}
         </div>
-        <Link to="/student" className="inline-block mt-6 bg-blue-600 text-white rounded-2xl px-6 py-3 font-bold">Kembali ke Dashboard</Link>
+
+        <Link
+          to="/student"
+          className="inline-block mt-6 bg-blue-600 text-white rounded-2xl px-6 py-3 font-bold"
+        >
+          Kembali ke Dashboard
+        </Link>
       </div>
     </Layout>
   );
@@ -551,17 +708,34 @@ function Result({ result }) {
 
 function History() {
   const [attempts, setAttempts] = useState([]);
-  useEffect(() => { api.get("/attempts/my").then(res => setAttempts(res.data)); }, []);
+
+  useEffect(() => {
+    api.get("/attempts/my").then((res) => setAttempts(res.data));
+  }, []);
 
   return (
     <section className="bg-white rounded-3xl shadow p-6 mt-8">
-      <h2 className="text-xl font-bold mb-4">Riwayat Latihan</h2>
-      {attempts.length === 0 && <p className="text-slate-500">Belum ada riwayat.</p>}
+      <h2 className="text-xl font-bold mb-4">
+        Riwayat Latihan
+      </h2>
+
+      {attempts.length === 0 && (
+        <p className="text-slate-500">
+          Belum ada riwayat.
+        </p>
+      )}
+
       <div className="space-y-3">
-        {attempts.map(a => (
+        {attempts.map((a) => (
           <div key={a._id} className="border rounded-2xl p-4">
-            <p className="font-bold">{a.category}</p>
-            <p className="text-slate-600">Skor: {a.score}/{a.totalQuestions} · {new Date(a.createdAt).toLocaleString("id-ID")}</p>
+            <p className="font-bold">
+              {a.category}
+            </p>
+
+            <p className="text-slate-600">
+              Skor: {a.score}/{a.totalQuestions} ·{" "}
+              {new Date(a.createdAt).toLocaleString("id-ID")}
+            </p>
           </div>
         ))}
       </div>
@@ -576,9 +750,30 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Auth type="login" />} />
         <Route path="/register" element={<Auth type="register" />} />
-        <Route path="/admin" element={<RequireRole role="admin"><AdminDashboard /></RequireRole>} />
-        <Route path="/student" element={<RequireRole role="student"><StudentDashboard /></RequireRole>} />
-        <Route path="/quiz/:category" element={<RequireRole role="student"><Quiz /></RequireRole>} />
+        <Route
+          path="/admin"
+          element={
+            <RequireRole role="admin">
+              <AdminDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/student"
+          element={
+            <RequireRole role="student">
+              <StudentDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/quiz/:category"
+          element={
+            <RequireRole role="student">
+              <Quiz />
+            </RequireRole>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
