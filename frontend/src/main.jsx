@@ -129,17 +129,320 @@ function RequireRole({ role, children }) {
 }
 
 function AdminDashboard() {
-  const [students, setStudents] = useState([]);
-  const [attempts, setAttempts] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [form, setForm] = useState({
+const [students, setStudents] = useState([]);
+const [attempts, setAttempts] = useState([]);
+const [questions, setQuestions] = useState([]);
+
+const [form, setForm] = useState({
+category: "Matematika",
+difficulty: "Sedang",
+questionText: "",
+options: "",
+correctAnswer: "",
+explanation: ""
+});
+
+const loadData = async () => {
+try {
+const [studentRes, attemptRes, questionRes] = await Promise.all([
+api.get("/users/students"),
+api.get("/attempts/all"),
+api.get("/questions")
+]);
+
+  setStudents(studentRes.data);
+  setAttempts(attemptRes.data);
+  setQuestions(questionRes.data);
+} catch (err) {
+  console.log(err);
+}
+
+};
+
+useEffect(() => {
+loadData();
+}, []);
+
+const addQuestion = async (e) => {
+e.preventDefault();
+
+try {
+  await api.post("/questions", {
+    ...form,
+    options: form.options.split("\n")
+  });
+
+  alert("Soal berhasil ditambahkan");
+
+  setForm({
     category: "Matematika",
     difficulty: "Sedang",
     questionText: "",
-    options: "Pilihan A\nPilihan B\nPilihan C\nPilihan D",
-    correctAnswer: "Pilihan A",
+    options: "",
+    correctAnswer: "",
     explanation: ""
   });
+
+  loadData();
+} catch (err) {
+  alert("Gagal menambah soal");
+}
+
+};
+
+const deleteQuestion = async (id) => {
+if (!window.confirm("Hapus soal ini?")) return;
+
+await api.delete(`/questions/${id}`);
+loadData();
+
+};
+
+return (
+
+
+
+
+    <div className="mb-8">
+      <h1 className="text-4xl font-bold text-blue-700">
+        Dashboard Admin MEDIS
+      </h1>
+      <p className="text-slate-500 mt-2">
+        Kelola soal olimpiade, murid, dan hasil latihan.
+      </p>
+    </div>
+
+    {/* STATISTIC */}
+    <div className="grid md:grid-cols-3 gap-5 mb-8">
+
+      <div className="bg-white rounded-3xl shadow p-6">
+        <div className="text-5xl mb-3">👨‍🎓</div>
+        <p className="text-slate-500">Jumlah Murid</p>
+        <h2 className="text-4xl font-bold text-blue-700">
+          {students.length}
+        </h2>
+      </div>
+
+      <div className="bg-white rounded-3xl shadow p-6">
+        <div className="text-5xl mb-3">📚</div>
+        <p className="text-slate-500">Jumlah Soal</p>
+        <h2 className="text-4xl font-bold text-green-600">
+          {questions.length}
+        </h2>
+      </div>
+
+      <div className="bg-white rounded-3xl shadow p-6">
+        <div className="text-5xl mb-3">🏆</div>
+        <p className="text-slate-500">Total Pengerjaan</p>
+        <h2 className="text-4xl font-bold text-purple-600">
+          {attempts.length}
+        </h2>
+      </div>
+
+    </div>
+
+    {/* FORM TAMBAH SOAL */}
+    <div className="bg-white rounded-3xl shadow p-6 mb-8">
+
+      <h2 className="text-2xl font-bold mb-5">
+        Tambah Soal Baru
+      </h2>
+
+      <form
+        onSubmit={addQuestion}
+        className="grid md:grid-cols-2 gap-4"
+      >
+
+        <select
+          className="border rounded-xl p-3"
+          value={form.category}
+          onChange={(e) =>
+            setForm({ ...form, category: e.target.value })
+          }
+        >
+          {categories.map((cat) => (
+            <option key={cat}>{cat}</option>
+          ))}
+        </select>
+
+        <select
+          className="border rounded-xl p-3"
+          value={form.difficulty}
+          onChange={(e) =>
+            setForm({ ...form, difficulty: e.target.value })
+          }
+        >
+          <option>Mudah</option>
+          <option>Sedang</option>
+          <option>Sulit</option>
+        </select>
+
+        <textarea
+          className="border rounded-xl p-3 md:col-span-2"
+          rows="4"
+          placeholder="Tulis soal di sini..."
+          value={form.questionText}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              questionText: e.target.value
+            })
+          }
+          required
+        />
+
+        <textarea
+          className="border rounded-xl p-3"
+          rows="6"
+          placeholder="Pilihan jawaban (1 baris = 1 pilihan)"
+          value={form.options}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              options: e.target.value
+            })
+          }
+          required
+        />
+
+        <textarea
+          className="border rounded-xl p-3"
+          rows="6"
+          placeholder="Pembahasan"
+          value={form.explanation}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              explanation: e.target.value
+            })
+          }
+        />
+
+        <input
+          className="border rounded-xl p-3"
+          placeholder="Kunci Jawaban"
+          value={form.correctAnswer}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              correctAnswer: e.target.value
+            })
+          }
+          required
+        />
+
+        <button
+          className="bg-blue-600 text-white rounded-xl p-3 font-bold"
+        >
+          Simpan Soal
+        </button>
+
+      </form>
+    </div>
+
+    {/* DAFTAR SOAL */}
+    <div className="bg-white rounded-3xl shadow p-6 mb-8">
+
+      <h2 className="text-2xl font-bold mb-5">
+        Bank Soal
+      </h2>
+
+      <div className="space-y-3">
+
+        {questions.map((q) => (
+          <div
+            key={q._id}
+            className="border rounded-2xl p-4 flex justify-between items-center"
+          >
+            <div>
+              <p className="font-bold">
+                {q.category} • {q.difficulty}
+              </p>
+
+              <p className="text-slate-600">
+                {q.questionText}
+              </p>
+            </div>
+
+            <button
+              onClick={() => deleteQuestion(q._id)}
+              className="bg-red-500 text-white px-4 py-2 rounded-xl"
+            >
+              Hapus
+            </button>
+          </div>
+        ))}
+
+      </div>
+    </div>
+
+    {/* DAFTAR MURID */}
+    <div className="bg-white rounded-3xl shadow p-6 mb-8">
+
+      <h2 className="text-2xl font-bold mb-5">
+        Daftar Murid
+      </h2>
+
+      <table className="w-full">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-3">Nama</th>
+            <th>Email</th>
+            <th>Sekolah</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {students.map((s) => (
+            <tr key={s._id} className="border-b">
+              <td className="py-3">{s.name}</td>
+              <td>{s.email}</td>
+              <td>{s.school}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+    </div>
+
+    {/* HASIL LATIHAN */}
+    <div className="bg-white rounded-3xl shadow p-6">
+
+      <h2 className="text-2xl font-bold mb-5">
+        Hasil Latihan Murid
+      </h2>
+
+      <table className="w-full">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left py-3">Nama</th>
+            <th>Kategori</th>
+            <th>Skor</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {attempts.map((a) => (
+            <tr key={a._id} className="border-b">
+              <td className="py-3">
+                {a.student?.name}
+              </td>
+              <td>{a.category}</td>
+              <td>
+                {a.score}/{a.totalQuestions}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+    </div>
+
+  </div>
+</Layout>
+
+);
+}
 
   const load = async () => {
     const [s, a, q] = await Promise.all([
